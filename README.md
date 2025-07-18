@@ -2,7 +2,7 @@
 
 Sistema de visualização e gerenciamento de dados para o Mercado do Oitizeiro, permitindo a consulta, edição e análise de informações de cadastros.
 
-![Oitizeiro Viewer](https://oitizeiro.vercel.app)
+(https://oitizeiro.vercel.app)
 
 ## Sobre o Projeto
 
