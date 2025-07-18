@@ -101,27 +101,32 @@ export function OitizeiroTable({ data: initialData }: { data: OitizeiroRecord[] 
 
   return (
     <div className="space-y-4">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Buscar por nome, CPF ou responsável..."
-          className="pl-10 w-full md:w-1/3"
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-        />
+      <div className="flex justify-between items-center">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Buscar por nome, CPF ou responsável..."
+            className="pl-10 w-full md:w-80 shadow-sm"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="text-sm font-medium text-muted-foreground">
+          Total de {filteredData.length} registros
+        </div>
       </div>
 
       <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted/50">
             <TableRow>
-              <TableHead>Nome Completo</TableHead>
-              <TableHead className="hidden md:table-cell">CPF</TableHead>
-              <TableHead>Atividade</TableHead>
-              <TableHead className="hidden lg:table-cell">Cidade</TableHead>
-              <TableHead className="hidden md:table-cell">Responsável</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <TableHead className="font-semibold">Nome Completo</TableHead>
+              <TableHead className="hidden md:table-cell font-semibold">CPF</TableHead>
+              <TableHead className="font-semibold">Atividade</TableHead>
+              <TableHead className="hidden lg:table-cell font-semibold">Cidade</TableHead>
+              <TableHead className="hidden md:table-cell font-semibold">Responsável</TableHead>
+              <TableHead className="text-right font-semibold">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
