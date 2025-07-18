@@ -29,6 +29,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { RecordDetailsDialog } from "./record-details-dialog"
 import { RecordEditDialog } from "./record-edit-dialog"
@@ -39,12 +46,22 @@ const ITEMS_PER_PAGE = 20
 export function OitizeiroTable({ data: initialData }: { data: OitizeiroRecord[] }) {
   const [data, setData] = React.useState<OitizeiroRecord[]>(initialData)
   const [searchTerm, setSearchTerm] = React.useState("")
+  const [activityFilter, setActivityFilter] = React.useState("all")
   const [currentPage, setCurrentPage] = React.useState(1)
 
   const [selectedRecord, setSelectedRecord] = React.useState<OitizeiroRecord | null>(null)
   const [isDetailsOpen, setDetailsOpen] = React.useState(false)
   const [isEditOpen, setEditOpen] = React.useState(false)
   const [isDeleteOpen, setDeleteOpen] = React.useState(false)
+
+  const uniqueActivities = React.useMemo(() => {
+    const activities = new Set(
+      initialData
+        .map(record => record.Atividade)
+        .filter(activity => activity && activity !== "0")
+    )
+    return ["all", ...Array.from(activities).sort()]
+  }, [initialData])
 
   const handleOpenDetails = (record: OitizeiroRecord) => {
     setSelectedRecord(record)
@@ -79,15 +96,16 @@ export function OitizeiroTable({ data: initialData }: { data: OitizeiroRecord[] 
     return data
       .filter(record => !record.deletedAt)
       .filter(record => {
-        if (!searchTerm) return true
         const lowercasedTerm = searchTerm.toLowerCase()
-        return (
+        const searchMatch = !searchTerm || (
           record["Nome Completo"].toLowerCase().includes(lowercasedTerm) ||
           record.CPF.toLowerCase().includes(lowercasedTerm) ||
           record["Responsável pelo cadastro"].toLowerCase().includes(lowercasedTerm)
         )
+        const activityMatch = activityFilter === "all" || record.Atividade === activityFilter
+        return searchMatch && activityMatch
       })
-  }, [data, searchTerm])
+  }, [data, searchTerm, activityFilter])
 
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE)
   const paginatedData = filteredData.slice(
@@ -97,36 +115,50 @@ export function OitizeiroTable({ data: initialData }: { data: OitizeiroRecord[] 
 
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchTerm])
+  }, [searchTerm, activityFilter])
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Buscar por nome, CPF ou responsável..."
-            className="pl-10 w-full md:w-80 shadow-sm"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Buscar por nome, CPF ou responsável..."
+              className="pl-10 w-full shadow-md"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Select value={activityFilter} onValueChange={setActivityFilter}>
+            <SelectTrigger className="w-full sm:w-[220px] shadow-md">
+              <SelectValue placeholder="Filtrar por atividade" />
+            </SelectTrigger>
+            <SelectContent>
+              {uniqueActivities.map((activity) => (
+                <SelectItem key={activity} value={activity}>
+                  {activity === "all" ? "Todas as Atividades" : activity}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="text-sm font-medium text-muted-foreground">
+        <div className="text-sm font-medium text-muted-foreground self-end md:self-center">
           Total de {filteredData.length} registros
         </div>
       </div>
 
       <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
         <Table>
-          <TableHeader className="bg-muted/50">
+          <TableHeader className="bg-muted">
             <TableRow>
-              <TableHead className="font-semibold">Nome Completo</TableHead>
-              <TableHead className="hidden md:table-cell font-semibold">CPF</TableHead>
-              <TableHead className="font-semibold">Atividade</TableHead>
-              <TableHead className="hidden lg:table-cell font-semibold">Cidade</TableHead>
-              <TableHead className="hidden md:table-cell font-semibold">Responsável</TableHead>
-              <TableHead className="text-right font-semibold">Ações</TableHead>
+              <TableHead className="font-semibold text-lg">Nome Completo</TableHead>
+              <TableHead className="hidden md:table-cell font-semibold text-lg">CPF</TableHead>
+              <TableHead className="font-semibold text-lg">Atividade</TableHead>
+              <TableHead className="hidden lg:table-cell font-semibold text-lg">Cidade</TableHead>
+              <TableHead className="hidden md:table-cell font-semibold text-lg">Responsável</TableHead>
+              <TableHead className="text-right font-semibold text-lg">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
